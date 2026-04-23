@@ -42,7 +42,7 @@ const SpreadsheetApp = () => {
   const [editingId, setEditingId] = useState(null);
   const [formData, setFormData] = useState({ nome: '', valor: '', status: 'Pendente', data: '' });
   
-  // ESTADO PARA OS SELECIONADOS
+  // ESTADO DOS SELECIONADOS
   const [selectedIds, setSelectedIds] = useState([]);
 
   useEffect(() => {
@@ -72,7 +72,6 @@ const SpreadsheetApp = () => {
 
   const handleLogin = async () => {
     const provider = new GoogleAuthProvider();
-    provider.setCustomParameters({ prompt: 'select_account' });
     try { await signInWithPopup(auth, provider); } catch (e) { console.error(e); }
   };
 
@@ -91,7 +90,7 @@ const SpreadsheetApp = () => {
     return vencimento < hoje;
   };
 
-  // LOGICA DO TOTALIZADOR
+  // LÓGICA DO TOTALIZADOR
   const toggleSelection = (id) => {
     setSelectedIds(prev => prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]);
   };
@@ -138,7 +137,7 @@ const SpreadsheetApp = () => {
     <div className="min-h-screen flex items-center justify-center bg-[#020617] p-4 font-sans">
       <div className="w-full max-w-md p-10 rounded-[35px] shadow-2xl border bg-gray-900 border-gray-800 text-center">
         <div className="bg-gradient-to-tr from-[#5643ff] to-[#8b5cf6] w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-6 animate-bounce"><Wallet className="text-white" size={32} /></div>
-        <h1 className="text-3xl font-black mb-8 italic text-white tracking-tighter">Gerenciador</h1>
+        <h1 className="text-3xl font-black mb-8 italic text-white tracking-tighter text-center">Gerenciador</h1>
         <button onClick={handleLogin} className="w-full bg-[#5643ff] text-white py-4 rounded-xl font-black uppercase tracking-[2px] active:scale-95 transition-transform">ENTRAR COM GOOGLE</button>
       </div>
     </div>
@@ -148,15 +147,15 @@ const SpreadsheetApp = () => {
     <div className={`min-h-screen p-4 md:p-12 font-sans transition-all duration-700 ${darkMode ? 'bg-[#020617] text-gray-100' : 'bg-[#f8f9ff] text-gray-900'}`}>
       
       {/* HEADER */}
-      <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6 mb-12 text-left">
-        <h1 className="text-4xl font-black tracking-tighter flex items-center gap-4 w-full">
+      <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6 mb-12">
+        <h1 className="text-4xl font-black tracking-tighter flex items-center gap-4 text-left w-full">
           <span className="bg-gradient-to-r from-[#5643ff] to-fuchsia-500 bg-clip-text text-transparent italic">Gerenciador</span>
           <button onClick={() => setDarkMode(!darkMode)} className="p-2.5 rounded-2xl bg-gray-800/50 hover:bg-gray-700 transition-colors">
             {darkMode ? <Sun size={20} className="text-yellow-400"/> : <Moon size={20}/>}
           </button>
         </h1>
         <div className="flex gap-3 w-full md:w-auto">
-          <button onClick={() => setIsModalOpen(true)} className="flex-1 md:flex-none bg-[#5643ff] hover:bg-[#4532ff] text-white px-10 py-4 rounded-2xl font-black uppercase text-[11px] tracking-widest flex items-center justify-center gap-2 shadow-lg hover:shadow-[#5643ff]/40 transition-all active:scale-95">
+          <button onClick={() => setIsModalOpen(true)} className="flex-1 md:flex-none bg-[#5643ff] hover:bg-[#4532ff] text-white px-10 py-4 rounded-2xl font-black uppercase text-[11px] tracking-widest flex items-center justify-center gap-2 shadow-lg transition-all active:scale-95">
             <Plus size={18} /> Novo Registro
           </button>
           <button onClick={() => signOut(auth)} className="p-4 rounded-2xl border border-gray-800 hover:bg-red-500/10 hover:text-red-500 transition-all"><LogOut size={20} /></button>
@@ -167,7 +166,7 @@ const SpreadsheetApp = () => {
       <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-6 mb-12 text-left">
         <div className={`p-8 rounded-[40px] border backdrop-blur-xl transition-all duration-300 hover:scale-[1.02] ${darkMode ? 'bg-white/[0.03] border-white/10' : 'bg-white border-gray-100'}`}>
           <div className="text-indigo-500 font-black uppercase text-[10px] mb-3 italic tracking-widest">Saldo Atual</div>
-          <div className="flex items-center"><span className="text-2xl font-black text-emerald-500 mr-2">R$</span><input type="number" step="0.01" className="bg-transparent text-4xl font-black outline-none w-full text-emerald-500" value={saldoEmConta} onChange={(e) => atualizarSaldoNoBanco(e.target.value)} /></div>
+          <div className="flex items-center"><span className="text-2xl font-black text-emerald-500 mr-2">R$</span><input type="number" step="0.01" className="bg-transparent text-4xl font-black outline-none w-full text-emerald-500 text-left" value={saldoEmConta} onChange={(e) => atualizarSaldoNoBanco(e.target.value)} /></div>
         </div>
 
         <div className={`p-8 rounded-[40px] border backdrop-blur-xl transition-all duration-300 hover:scale-[1.02] ${darkMode ? 'bg-white/[0.03] border-white/10' : 'bg-white border-gray-100'}`}>
@@ -187,7 +186,7 @@ const SpreadsheetApp = () => {
         </div>
       </div>
 
-      {/* ÁREA DA LISTA */}
+      {/* ÁREA DA LISTA / TABELA */}
       <div className={`max-w-7xl mx-auto rounded-[45px] shadow-2xl border overflow-hidden ${darkMode ? 'bg-gray-900/80 border-white/10' : 'bg-white border-gray-50'}`}>
         <div className="p-10 space-y-8">
           <div className="flex flex-col md:flex-row justify-between items-center gap-6">
@@ -207,7 +206,7 @@ const SpreadsheetApp = () => {
           <table className="w-full min-w-[350px]">
             <thead className="hidden md:table-header-group">
               <tr className={`text-[10px] font-black uppercase tracking-widest text-gray-400 border-b ${darkMode ? 'border-white/5' : 'border-gray-200'}`}>
-                <th className="px-6 py-8 text-center italic w-10">#</th>
+                <th className="px-6 py-8 text-center w-10">#</th>
                 <th className="px-6 py-8 italic text-left">Vencimento</th>
                 <th className="px-10 py-8 italic text-left">Descrição</th>
                 <th className="px-10 py-8 italic text-left">Valor</th>
@@ -283,7 +282,7 @@ const SpreadsheetApp = () => {
       {selectedIds.length > 0 && (
         <div className="fixed bottom-10 left-1/2 -translate-x-1/2 z-40 animate-in slide-in-from-bottom-10 duration-500">
           <div className="bg-gray-900 border border-[#5643ff]/50 px-8 py-5 rounded-[30px] shadow-[0_0_40px_rgba(86,67,255,0.3)] flex items-center gap-8 backdrop-blur-xl">
-            <div className="flex flex-col">
+            <div className="flex flex-col text-left">
               <span className="text-[10px] font-black uppercase text-indigo-400 tracking-widest italic">Total Selecionado ({selectedIds.length})</span>
               <span className="text-2xl font-black text-white tracking-tighter">R$ {totalSelecionado.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</span>
             </div>
@@ -297,7 +296,7 @@ const SpreadsheetApp = () => {
       {isModalOpen && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center p-6 z-50 animate-in fade-in duration-300">
           <div className={`w-full max-w-xl rounded-[50px] p-12 shadow-2xl border transform animate-in zoom-in-95 duration-300 ${darkMode ? 'bg-gray-900 border-white/10 text-white' : 'bg-white border-transparent text-gray-900'}`}>
-            <div className="flex justify-between items-center mb-10"><h2 className="text-3xl font-black italic tracking-tighter">Novo Registro</h2><button onClick={closeModal} className="hover:rotate-90 transition-all p-2 bg-white/5 rounded-full"><X size={24} /></button></div>
+            <div className="flex justify-between items-center mb-10"><h2 className="text-3xl font-black italic tracking-tighter text-left">Novo Registro</h2><button onClick={closeModal} className="hover:rotate-90 transition-all p-2 bg-white/5 rounded-full"><X size={24} /></button></div>
             <form onSubmit={handleSubmit} className="space-y-8 text-left">
               <div className="space-y-2">
                 <label className="text-[10px] font-black uppercase tracking-widest text-gray-500 ml-2">Descrição</label>
