@@ -166,7 +166,7 @@ const SpreadsheetApp = () => {
           <h3 className="text-4xl font-black text-emerald-500 text-left tracking-tighter">R$ {totalPago.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</h3>
         </div>
         <div className={`p-8 rounded-[40px] shadow-xl bg-gradient-to-br ${statusSobra.cor} ${statusSobra.neon} text-white transition-all hover:scale-[1.05]`}>
-          <p className="text-white/70 text-[10px] font-black uppercase mb-3 tracking-widest text-left">Sobra Final</p>
+          <p className="text-white/70 text-[10px] font-black uppercase mb-3 tracking-widest text-left">Falta</p>
           <h3 className="text-4xl font-black tracking-tighter text-left">R$ {Math.abs(saldoFinalPositivo).toLocaleString('pt-BR', {minimumFractionDigits: 2})}</h3>
         </div>
       </div>
