@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Plus, Search, Trash2, X, Edit3, Wallet, LogOut, Moon, Sun, Landmark, FileText, CreditCard, PiggyBank, Filter, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { Plus, Search, Trash2, X, Edit3, Wallet, LogOut, Moon, Sun, Landmark, FileText, CreditCard, PiggyBank, Filter, AlertCircle } from 'lucide-react';
 
 // --- CONFIGURAÇÃO FIREBASE ---
 import { initializeApp } from "firebase/app";
@@ -7,12 +7,12 @@ import { getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot
 import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "firebase/auth";
 
 const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
-  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
-  appId: import.meta.env.VITE_FIREBASE_APP_ID
+  apiKey: "AIzaSyBqjSIiy8nMhVdhUtVxN1Ykkm8OmZzAa-Q",
+  authDomain: "gerenciador-523bf.firebaseapp.com",
+  projectId: "gerenciador-523bf",
+  storageBucket: "gerenciador-523bf.firebasestorage.app",
+  messagingSenderId: "627593799117",
+  appId: "1:627593799117:web:c88474f6d2bc6f1fddd084"
 };
 
 const app = initializeApp(firebaseConfig);
@@ -41,9 +41,6 @@ const SpreadsheetApp = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [formData, setFormData] = useState({ nome: '', valor: '', status: 'Pendente', data: '' });
-  
-  // ESTADO DOS SELECIONADOS
-  const [selectedIds, setSelectedIds] = useState([]);
 
   useEffect(() => {
     localStorage.setItem('theme', darkMode ? 'dark' : 'light');
@@ -72,6 +69,7 @@ const SpreadsheetApp = () => {
 
   const handleLogin = async () => {
     const provider = new GoogleAuthProvider();
+    provider.setCustomParameters({ prompt: 'select_account' });
     try { await signInWithPopup(auth, provider); } catch (e) { console.error(e); }
   };
 
@@ -89,17 +87,6 @@ const SpreadsheetApp = () => {
     vencimento.setHours(0, 0, 0, 0);
     return vencimento < hoje;
   };
-
-  // LÓGICA DO TOTALIZADOR
-  const toggleSelection = (id) => {
-    setSelectedIds(prev => prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]);
-  };
-
-  const totalSelecionado = useMemo(() => {
-    return data
-      .filter(item => selectedIds.includes(item.id))
-      .reduce((acc, curr) => acc + (parseFloat(curr.valor) || 0), 0);
-  }, [data, selectedIds]);
 
   const totalPendente = useMemo(() => data.filter(item => item.status !== 'Confirmada').reduce((acc, curr) => acc + (parseFloat(curr.valor) || 0), 0), [data]);
   const totalPago = useMemo(() => data.filter(item => item.status === 'Confirmada').reduce((acc, curr) => acc + (parseFloat(curr.valor) || 0), 0), [data]);
@@ -137,7 +124,7 @@ const SpreadsheetApp = () => {
     <div className="min-h-screen flex items-center justify-center bg-[#020617] p-4 font-sans">
       <div className="w-full max-w-md p-10 rounded-[35px] shadow-2xl border bg-gray-900 border-gray-800 text-center">
         <div className="bg-gradient-to-tr from-[#5643ff] to-[#8b5cf6] w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-6 animate-bounce"><Wallet className="text-white" size={32} /></div>
-        <h1 className="text-3xl font-black mb-8 italic text-white tracking-tighter text-center">Gerenciador</h1>
+        <h1 className="text-3xl font-black mb-8 italic text-white tracking-tighter">Gerenciador</h1>
         <button onClick={handleLogin} className="w-full bg-[#5643ff] text-white py-4 rounded-xl font-black uppercase tracking-[2px] active:scale-95 transition-transform">ENTRAR COM GOOGLE</button>
       </div>
     </div>
@@ -155,7 +142,10 @@ const SpreadsheetApp = () => {
           </button>
         </h1>
         <div className="flex gap-3 w-full md:w-auto">
-          <button onClick={() => setIsModalOpen(true)} className="flex-1 md:flex-none bg-[#5643ff] hover:bg-[#4532ff] text-white px-10 py-4 rounded-2xl font-black uppercase text-[11px] tracking-widest flex items-center justify-center gap-2 shadow-lg transition-all active:scale-95">
+          <button 
+            onClick={() => setIsModalOpen(true)} 
+            className="flex-1 md:flex-none bg-[#5643ff] hover:bg-[#4532ff] text-white px-10 py-4 rounded-2xl font-black uppercase text-[11px] tracking-widest flex items-center justify-center gap-2 shadow-lg hover:shadow-[#5643ff]/40 transition-all active:scale-95"
+          >
             <Plus size={18} /> Novo Registro
           </button>
           <button onClick={() => signOut(auth)} className="p-4 rounded-2xl border border-gray-800 hover:bg-red-500/10 hover:text-red-500 transition-all"><LogOut size={20} /></button>
@@ -165,22 +155,22 @@ const SpreadsheetApp = () => {
       {/* CARDS SUPERIORES */}
       <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-6 mb-12 text-left">
         <div className={`p-8 rounded-[40px] border backdrop-blur-xl transition-all duration-300 hover:scale-[1.02] ${darkMode ? 'bg-white/[0.03] border-white/10' : 'bg-white border-gray-100'}`}>
-          <div className="text-indigo-500 font-black uppercase text-[10px] mb-3 italic tracking-widest">Saldo Atual</div>
-          <div className="flex items-center"><span className="text-2xl font-black text-emerald-500 mr-2">R$</span><input type="number" step="0.01" className="bg-transparent text-4xl font-black outline-none w-full text-emerald-500 text-left" value={saldoEmConta} onChange={(e) => atualizarSaldoNoBanco(e.target.value)} /></div>
+          <div className="text-indigo-500 font-black uppercase text-[10px] mb-3 italic">Saldo Atual</div>
+          <div className="flex items-center"><span className="text-2xl font-black text-emerald-500 mr-2">R$</span><input type="number" step="0.01" className="bg-transparent text-4xl font-black outline-none w-full text-emerald-500" value={saldoEmConta} onChange={(e) => atualizarSaldoNoBanco(e.target.value)} /></div>
         </div>
 
         <div className={`p-8 rounded-[40px] border backdrop-blur-xl transition-all duration-300 hover:scale-[1.02] ${darkMode ? 'bg-white/[0.03] border-white/10' : 'bg-white border-gray-100'}`}>
-          <div className="text-red-500 font-black uppercase text-[10px] mb-3 italic tracking-widest">Pendente</div>
+          <div className="text-red-500 font-black uppercase text-[10px] mb-3 italic">Pendente</div>
           <h3 className="text-4xl font-black text-red-500">R$ {totalPendente.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</h3>
         </div>
 
         <div className={`p-8 rounded-[40px] border backdrop-blur-xl transition-all duration-300 hover:scale-[1.02] ${darkMode ? 'bg-white/[0.03] border-white/10' : 'bg-white border-gray-100'}`}>
-          <div className="text-emerald-500 font-black uppercase text-[10px] mb-3 italic tracking-widest">Pago</div>
+          <div className="text-emerald-500 font-black uppercase text-[10px] mb-3 italic">Pago</div>
           <h3 className="text-4xl font-black text-emerald-500">R$ {totalPago.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</h3>
         </div>
 
         <div className={`p-8 rounded-[40px] shadow-2xl bg-gradient-to-br ${statusSobra.cor} ${statusSobra.neon} text-white transition-all duration-500 hover:scale-[1.05]`}>
-          <p className="text-white/70 text-[10px] font-black uppercase mb-3 italic tracking-widest">Sobra Final</p>
+          <p className="text-white/70 text-[10px] font-black uppercase mb-3 italic">Sobra Final</p>
           <h3 className="text-4xl font-black tracking-tighter">R$ {Math.abs(saldoFinalPositivo).toLocaleString('pt-BR', {minimumFractionDigits: 2})}</h3>
           <span className="bg-black/20 px-3 py-1 rounded-full text-[9px] font-black uppercase mt-3 inline-block">{statusSobra.msg}</span>
         </div>
@@ -202,12 +192,11 @@ const SpreadsheetApp = () => {
           </div>
         </div>
 
-        <div className="overflow-x-auto text-left pb-20">
+        <div className="overflow-x-auto text-left">
           <table className="w-full min-w-[350px]">
             <thead className="hidden md:table-header-group">
               <tr className={`text-[10px] font-black uppercase tracking-widest text-gray-400 border-b ${darkMode ? 'border-white/5' : 'border-gray-200'}`}>
-                <th className="px-6 py-8 text-center w-10">#</th>
-                <th className="px-6 py-8 italic text-left">Vencimento</th>
+                <th className="px-10 py-8 italic text-left">Vencimento</th>
                 <th className="px-10 py-8 italic text-left">Descrição</th>
                 <th className="px-10 py-8 italic text-left">Valor</th>
                 <th className="px-10 py-8 italic text-left">Status</th>
@@ -218,22 +207,17 @@ const SpreadsheetApp = () => {
               {filteredData.map((item) => {
                 const cat = getCategoria(item.nome, darkMode);
                 const vencido = verificarVencido(item.data, item.status);
-                const isSelected = selectedIds.includes(item.id);
                 return (
                   <tr key={item.id} className={`flex flex-col md:table-row border-b transition-all duration-300 ${
-                    isSelected ? (darkMode ? 'bg-[#5643ff]/10' : 'bg-[#5643ff]/5') :
-                    vencido ? 'bg-red-500/5' : darkMode ? 'border-white/5 hover:bg-white/[0.02]' : 'border-gray-100 hover:bg-gray-50'
+                    vencido 
+                      ? 'bg-red-500/5 border-red-500/20 hover:bg-red-500/10' 
+                      : darkMode ? 'border-white/5 hover:bg-white/[0.02]' : 'border-gray-100 hover:bg-gray-50'
                   } p-6 md:p-0`}>
                     
-                    <td className="md:px-6 md:py-7 text-center">
-                      <button onClick={() => toggleSelection(item.id)} className={`transition-all ${isSelected ? 'text-[#5643ff] scale-125' : 'text-gray-500 hover:text-gray-300'}`}>
-                        <CheckCircle2 size={22} fill={isSelected ? "currentColor" : "none"} />
-                      </button>
-                    </td>
-
-                    <td className="md:px-6 md:py-7 mb-2 md:mb-0">
+                    {/* Vencimento */}
+                    <td className="md:px-10 md:py-7 mb-2 md:mb-0">
                       <div className="flex flex-col">
-                        <span className={vencido ? "text-red-500 font-black underline" : item.status !== 'Confirmada' ? "text-red-400/70" : "text-gray-400"}>
+                        <span className={vencido ? "text-red-500 font-black" : item.status !== 'Confirmada' ? "text-red-400/70" : "text-gray-400"}>
                           {item.data ? new Date(item.data + "T12:00:00").toLocaleDateString('pt-BR') : "--/--"}
                         </span>
                         {vencido && <span className="text-[8px] font-black text-red-500 flex items-center gap-1 mt-1 animate-pulse"><AlertCircle size={10}/> VENCIDO</span>}
@@ -241,27 +225,39 @@ const SpreadsheetApp = () => {
                     </td>
 
                     <td className="md:px-10 md:py-7 flex flex-col md:table-cell mb-3 md:mb-0">
-                      <div className="flex items-center gap-3 text-left group">
+                      <div className="flex items-center gap-3 text-left">
                         <span className={`p-2 rounded-lg border transition-transform group-hover:scale-110 ${cat.color}`}>{cat.icon}</span>
-                        <span className={`tracking-tight text-base md:text-sm ${vencido ? 'text-red-200' : ''}`}>{item.nome}</span>
+                        <div className="flex flex-col">
+                          <span className={`tracking-tight text-base md:text-sm ${vencido ? 'text-red-200' : ''}`}>{item.nome}</span>
+                          <span className={`md:hidden text-lg mt-1 font-black ${item.status === 'Confirmada' ? 'text-emerald-500' : vencido ? 'text-red-500' : 'text-red-400'}`}>
+                            R$ {item.valor.toLocaleString('pt-BR', {minimumFractionDigits: 2})}
+                          </span>
+                        </div>
                       </div>
                     </td>
 
-                    <td className={`md:table-cell px-10 py-7 text-lg tracking-tighter ${item.status === 'Confirmada' ? 'text-emerald-500' : vencido ? 'text-red-500' : 'text-red-400'}`}>
+                    <td className={`hidden md:table-cell px-10 py-7 text-lg tracking-tighter ${item.status === 'Confirmada' ? 'text-emerald-500' : vencido ? 'text-red-500' : 'text-red-400'}`}>
                       R$ {item.valor.toLocaleString('pt-BR', {minimumFractionDigits: 2})}
                     </td>
 
                     <td className="md:px-10 md:py-7 flex justify-between items-center md:table-cell">
                       <select 
                         className={`px-4 py-2 rounded-full text-[10px] font-black uppercase outline-none cursor-pointer transition-all ${
-                          item.status === 'Confirmada' ? 'bg-emerald-500/10 text-emerald-500' : 'bg-amber-500/10 text-amber-500'
-                        }`} 
+                          item.status === 'Confirmada' 
+                            ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' 
+                            : 'bg-amber-500/10 text-amber-500 border-amber-500/20'
+                        } border`} 
                         value={item.status} 
                         onChange={async (e) => await updateDoc(doc(db, "registros", item.id), { status: e.target.value })}
                       >
                         <option value="Pendente">Pendente</option>
                         <option value="Confirmada">Pago</option>
                       </select>
+
+                      <div className="flex md:hidden gap-4">
+                        <button onClick={() => { setEditingId(item.id); setFormData({...item}); setIsModalOpen(true); }} className="p-2 bg-white/5 rounded-lg text-gray-400 hover:text-indigo-500 transition-colors"><Edit3 size={18}/></button>
+                        <button onClick={async () => { if(window.confirm("Excluir?")) await deleteDoc(doc(db, "registros", item.id)) }} className="p-2 bg-white/5 rounded-lg text-gray-400 hover:text-red-500 transition-colors"><Trash2 size={18}/></button>
+                      </div>
                     </td>
 
                     <td className="hidden md:table-cell px-10 py-7 text-right">
@@ -278,21 +274,7 @@ const SpreadsheetApp = () => {
         </div>
       </div>
 
-      {/* PAINEL FLUTUANTE DO TOTALIZADOR */}
-      {selectedIds.length > 0 && (
-        <div className="fixed bottom-10 left-1/2 -translate-x-1/2 z-40 animate-in slide-in-from-bottom-10 duration-500">
-          <div className="bg-gray-900 border border-[#5643ff]/50 px-8 py-5 rounded-[30px] shadow-[0_0_40px_rgba(86,67,255,0.3)] flex items-center gap-8 backdrop-blur-xl">
-            <div className="flex flex-col text-left">
-              <span className="text-[10px] font-black uppercase text-indigo-400 tracking-widest italic">Total Selecionado ({selectedIds.length})</span>
-              <span className="text-2xl font-black text-white tracking-tighter">R$ {totalSelecionado.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</span>
-            </div>
-            <div className="h-10 w-[1px] bg-white/10"></div>
-            <button onClick={() => setSelectedIds([])} className="text-gray-400 hover:text-white transition-colors"><X size={20}/></button>
-          </div>
-        </div>
-      )}
-
-      {/* MODAL NOVO REGISTRO */}
+      {/* MODAL */}
       {isModalOpen && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center p-6 z-50 animate-in fade-in duration-300">
           <div className={`w-full max-w-xl rounded-[50px] p-12 shadow-2xl border transform animate-in zoom-in-95 duration-300 ${darkMode ? 'bg-gray-900 border-white/10 text-white' : 'bg-white border-transparent text-gray-900'}`}>
